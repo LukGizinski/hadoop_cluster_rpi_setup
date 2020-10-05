@@ -1,22 +1,34 @@
-### HADOOP CLUSTER SETUP ON RPI
+### HADOOP CLUSTER SETUP ON Raspberry Pi 3B+
 
-> Hello I do this just beause I would like to experiment with Hadoop just for bit specjalny I’m intrested in setting up this cluster enviorment for Spark. I assume it will not perform well with Big Data because the RPI are tiny 1GB RAM units. It’s not my first try to get this up and run but t I want to document this process well. At this point of time I tried 3 times and 3 times failed. The problem is I did not document my mistakes well but there were different reasons why I did not make it. This time I will keep my notes here. And hopefully will share what went wrong. Have fun and don’t get frustrated.      
 
->In my previous design I thought to have 4 PI’s combained into cluster but now I think I will add one of old junky laptops that I have their like 2GB of RAM units. I’m not sure if it will work. I know that I can just get the th RPI but to be honest there’s so much electronic waste that I would like to give life after death to all those things.  
+## MOTIVATION
 
-### The concept is to have 
+Impress friends!
+
+Crush enemies!
+
+
+## DESCRIPTION
+
+I would like to experiment with Hadoop just for bit and cheap option here is to setup this on RPI's. To be honest I’m most interested in setting up this cluster environment for Spark. I assume it will not perform well with Big Data because RPI's are tiny 1GB RAM units but hope it will do the job with small data sets. It’s not my first try to get this up and running but this time I want to document process well. At this point of time [05OCT2020] I already tried 3 times and 3 times failed but last time I was very close.      
+
+
+In my previous design I planed to have 4 PI’s combined into cluster but now because you can install Raspberry Pi OS on any computer I think I will add one of my old laptops. Why? because on master node I plan to keep only Hadoop and on old laptop node I plan to instal SPARK and as well SSH all RPI's from it.
+
+### The concept is to have
 
 - 1 master node on RPI
 - 3 working nodes on RPI’s
 - The old laptop will be the 5th node with Spark and some other things. Also will use it to SSH all the Pi’s   
 
 
-### Hardware:
+### Hardware spec:
 
 - 4 x Raspberry Pi 3B+
 - Network Switch
 - Old Laptop
-- Mini SD cards Samasung EVO PLUS 32 GB
+- Mini SD cards Samsung EVO PLUS 32 GB
+- USB stick
 
 ### Software:
 
@@ -25,24 +37,20 @@
 - Java 7
 
 
-Reading:
+Also I've been inspired followed by this article and followed some of the steps which was very helpful but still for some reason I did not succeed
 
-this
-
-https://medium.com/analytics-vidhya/build-raspberry-pi-hadoop-spark-cluster-from-scratch-c2fa056138e0
-
-and that   
-
-https://dev.to/awwsmm/building-a-raspberry-pi-hadoop-spark-cluster-8b2
+[Article](https://dev.to/awwsmm/building-a-raspberry-pi-hadoop-spark-cluster-8b2)
 
 
-Hadoop configuration
+Also I found this which is very similar to the first one:
 
-https://dev.to/awwsmm/building-a-raspberry-pi-hadoop-spark-cluster-8b2
-
-
+[Article](https://medium.com/analytics-vidhya/build-raspberry-pi-hadoop-spark-cluster-from-scratch-c2fa056138e0)
 
 
+Ok bellow you will find my chaotic notes that I took some time ago now I will try to make this possible to read and understand as for now it's total mess:
+
+
+### !!! BELOW STEPS ARE OUTDATED AND THIS WORK IS IN PROGRESS!!!
 
 Hadoop
 
@@ -56,7 +64,7 @@ $ diskutil list
 
 $ sudo diskutil eraseDisk FAT32 MYSD MBRFormat /dev/disk2
 
- 
+
 #get the system: download berry boot and transfer files to your sd card
 
 https://www.berryterminal.com/doku.php/berryboot
@@ -106,25 +114,25 @@ pi3
 pi4
 192.168.8.127 pi5
 
-edit the file 
+edit the file
 /etc/dhcpcd.conf on each Pi and uncomment / edit the lines:
 
 interface eth0
 static ip_address=192.168.1.231/24
 
 
-#on master pi install to check the statuses of Pi 
+#on master pi install to check the statuses of Pi
 
 sudo apt-get install nmap
 sudo apt-get upgrade
 nmap -sP 192.168.8.0/24
 
-#edit the 
+#edit the
 
-#Create ~/.ssh/config 
+#Create ~/.ssh/config
 
 mkdir .ssh
-nano ~/.ssh/config 
+nano ~/.ssh/config
 
 #and paste there file on each pi
 
@@ -160,13 +168,13 @@ cat .ssh/id_ed25519.pub >> .ssh/authorized_keys
 Finally, to replicate the passwordless ssh across all Pis, simply copy the two files mentioned above and run below from Pi #1 to each other Pi using scp:
 
 scp ~/.ssh/authorized_keys pi2:~/.ssh/authorized_keys
-scp ~/.ssh/config pi2:~/.ssh/config 
+scp ~/.ssh/config pi2:~/.ssh/config
 
 scp ~/.ssh/authorized_keys pi3:~/.ssh/authorized_keys
-scp ~/.ssh/config pi3:~/.ssh/config 
+scp ~/.ssh/config pi3:~/.ssh/config
 
 scp ~/.ssh/authorized_keys pi4:~/.ssh/authorized_keys
-scp ~/.ssh/config pi4:~/.ssh/config 
+scp ~/.ssh/config pi4:~/.ssh/config
 
 
 
