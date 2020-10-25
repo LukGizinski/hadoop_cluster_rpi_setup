@@ -13,7 +13,7 @@ Crush enemies!
 I would like to experiment with Hadoop just for bit and cheap option here is to setup this on RPI's. To be honest I’m most interested in setting up this cluster environment for Spark. I assume it will not perform well with Big Data because RPI's are tiny 1GB RAM units but hope it will do the job with small data sets. It’s not my first try to get this up and running but this time I want to document process well. At this point of time [05OCT2020] I already tried 3 times and 3 times failed but last time I was very close.      
 
 
-In my previous design I planed to have 4 PI’s combined into cluster but now because you can install Raspberry Pi OS on any computer I think I will add one of my old laptops. Why? because on master node I plan to keep only Hadoop and on old laptop node I plan to instal SPARK and as well SSH all RPI's from it.
+In my previous design I planed to have 4 PI’s combined into cluster but now because you can install Raspberry Pi OS on any computer I think I will add one of my old laptops. Why? because on master node I plan to keep only Hadoop and on old Toshiba laptop node I plan to instal SPARK and as well SSH all RPI's from it.
 
 ### The concept is to have
 
@@ -48,6 +48,76 @@ Also I found this which is very similar to the first one:
 
 
 Ok bellow you will find my chaotic notes that I took some time ago now I will try to make this possible to read and understand as for now it's total mess:
+
+
+### FORMATING SD CARDS WITH ALREADY BOOTBALE RPI SYSTEM ON IT
+10/26/2020
+So it's actually 3rd or 4th time when I forgot how to format those SD cards, and because there's allready bootable system then it's not the standard road... 
+
+1. Plug in your removable flash drive and run the ‘lsblk’ command to identify the device.
+
+pi@raspberry:~ $ lsblk
+
+Here is the output of the 'lsblk' command on my system where ‘sdb’ is the removable flash storage:
+
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda      8:0    0 232.9G  0 disk 
+├─sda1   8:1    0 230.9G  0 part /
+├─sda2   8:2    0     1K  0 part 
+└─sda5   8:5    0     2G  0 part [SWAP]
+sdc      8:32   1  29.8G  0 disk 
+├─sdc1   8:33   1    63M  0 part 
+├─sdc2   8:34   1     1K  0 part 
+├─sdc5   8:37   1    32M  0 part 
+├─sdc6   8:38   1   256M  0 part /media/pi/boot
+└─sdc7   8:39   1  29.5G  0 part /media/pi/root
+
+There are many command line tools to do the job, but lately I started using 'parted' more, so that’s the utility I will be using for this tutorial. Run the 'parted' command with the name of the block device that you want to format. In this case, it’s ‘sdc’. (Be careful with the name of the block device because you might end up formatting the wrong drive.)
+
+
+3. Exchange ‘sdb’ with the name of your block device in the following command:
+
+sudo parted /dev/sdc
+
+4. It will ask you to enter the password for the user and you will notice that parted replaces the username and $ sign, which means you are running the parted utility. First, let’s create a partition table. In this case, we are using MBR:
+
+(parted) mklabel msdos
+
+Pick 'Ignore' and 'Yes' road
+
+5. Once the partition table is created, you can create partitions on the drive. We will be creating just one partition:
+
+(parted) mkpart primary fat32 1MiB 100%
+
+6. Then set the boot flag on it:
+
+(parted) set 1 boot on
+
+7. Exit the parted tool:
+
+(parted) quit
+
+8. Now we need to format this partition as fat 32. First, check if the partition has been created successfully. Just run the 'lsblk' command and verify a new partition on ‘sdc’.
+
+output:
+
+pi@raspberry:~ $ lsblk
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda      8:0    0 232.9G  0 disk 
+├─sda1   8:1    0 230.9G  0 part /
+├─sda2   8:2    0     1K  0 part 
+└─sda5   8:5    0     2G  0 part [SWAP]
+sdc      8:32   1  29.8G  0 disk 
+└─sdc1   8:33   1  29.8G  0 part /media/pi/76A7-71F4
+
+
+9. Now format it as fat32:
+
+sudo mkfs.vfat /dev/sdc1
+
+Just exchange ‘sdb1’ with the partition of your drive. Make sure to format the ‘partition on ‘sdb’ and not ‘sdb’ itself.
+
+That’s how you format external storage devices on Linux. Now you can go ahead and start using the removable drive.
 
 
 ### !!! BELOW STEPS ARE OUTDATED AND THIS WORK IS IN PROGRESS!!!
