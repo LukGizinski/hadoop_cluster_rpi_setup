@@ -138,9 +138,9 @@ $ sudo nmap –sP 192.168.0.0/24
 ...will show the status of all other Pis, not including the one on which the command is run. The "N hosts up" shows how many Pis are properly configured according to the above, currently connected, and powered on.
 
 
-28/10/2020 Ok done for today and workd till here 
+28/10/2020 it works and I'm done for today.
 
-[Pi](https://i.imgur.com/SVIkXvS.jpg)
+<a href="https://imgur.com/SVIkXvS"><img src="https://i.imgur.com/SVIkXvS.jpg" title="source: imgur.com" /></a>
 
 #### !!! BELOW STEPS ARE OUTDATED AND THIS WORK IS IN PROGRESS!!! and slowly move foward
 
