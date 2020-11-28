@@ -140,15 +140,73 @@ $ sudo nmap –sP 192.168.0.0/24
 
 28/10/2020 it works and I'm done for today.
 
-<a href="https://imgur.com/SVIkXvS"><img src="https://i.imgur.com/SVIkXvS.jpg" title="source: imgur.com" /></a>
 
-#### !!! BELOW STEPS ARE OUTDATED AND THIS WORK IS IN PROGRESS!!! and slowly move foward
+Ok we're good to start with our PI's first will setup the SSH so I will able to enter my RPi's headless.
+
+First you need to enable on each RPI to connect with SSH so you will have to go to options
+
+$sudo raspi-config
+
+and enable this option otherwise you will not be able to do below.
+
+To connect from one RPi to another, having followed only the above instructions, would require the following series of commands:
+
+$ ssh pi@192.168.0.10X
+pi@192.168.0.10X's password: <enter password – 'raspberry' default>
+Granted, this is not too much typing, but if we have to do it very often, it could become cumbersome. To avoid this, we can set up ssh aliases and passwordless ssh connections with public/private key pairs.
+
+ssh aliases
+
+To set up an ssh alias, we edit the ~/.ssh/config file on a particular Pi (in my case it will be the old laptop tha as well will be a part of cluster and I want to ssh the RPI through it)
+
+$ mkdir .ssh
+$ nano ~/.ssh/config
 
 
+and add the following lines:
 
-Ok we're good to go at this stage and let's start with our PI's first will setup the SSH so I will able to enter my Pi's headless.
+Host piX
+User pi
+Hostname 192.168.0.10X
 
-Let's start with the first one:
+...replacing X with 1-5 for each of the eight Pis. Note that this is done on a single Pi, so that one Pi should have eight chunks of code within ~/.ssh/config, which look identical to the above except for the X character, which should change for each Pi on the network. Then, the ssh command sequence becomes just:
+
+$ ssh piX
+pi@192.168.0.10X's password: <enter password>
+This can be simplified further by setting up public/private key pairs.
+
+public/private key pairs
+
+On each Pi, run the following command:
+
+$ ssh-keygen –t ed25519
+This will generate a public / private key pair within the directory ~/.ssh/ which can be used to securely ssh without entering a password. One of these files will be called id_ed25519, this is the private key. The other, id_ed25519.pub is the public key. No passphrase is necessary to protect access to the key pair. The public key is used to communicate with the other Pis, and the private key never leaves its host machine and should never be moved or copied to any other device.
+
+Each public key will need to be concatenated to the ~/.ssh/authorized_keys file on every other Pi. It's easiest to do this once, for a single Pi, then simply copy the authorized_keys file to the other Pis. Let's assume that Pi #1 will contain the "master" record, which is then copied to the other Pis.
+
+On Pi #2 (and #3, #4, etc.), run the following command:
+
+$ cat ~/.ssh/id_ed25519.pub | ssh pi@192.168.0.101 'cat >> .ssh/authorized_keys'
+This concatenates Pi #2's public key file to Pi #1's list of authorized keys, giving Pi #2 permission to ssh into Pi #1 without a password (the public and private keys are instead used to validate the connection). We need to do this for each machine, concatenating each public key file to Pi #1's list of authorized keys. We should also do this for Pi #1, so that when we copy the completed authorized_keys file to the other Pis, they all have permission to ssh into Pi #1, as well. Run the following command on Pi #1:
+
+$ cat .ssh/id_ed25519.pub >> .ssh/authorized_keys
+Once this is done, as well as the previous section, ssh-ing is as easy as:
+
+$ ssh pi1
+...and that's it! Additional aliases can be configured in the ~/.bashrc file to shorten this further (see below) though this is not configured on our system:
+
+alias p1="ssh pi1" # etc.
+replicate the configuration
+
+Finally, to replicate the passwordless ssh across all Pis, simply copy the two files mentioned above from Pi #1 to each other Pi using scp:
+
+$ scp ~/.ssh/authorized_keys piX:~/.ssh/authorized_keys
+$ scp ~/.ssh/config piX:~/.ssh/config 
+You should now be able to ssh into any Pi on the cluster from any other Pi with just ssh piX.
+
+
+#### !!! BELOW STEPS ARE OUTDATED AND THIS WORK IS IN PROGRESS!!! and slowly move foward next will look into Java instalation
+
 
 
 ### JAVA configuration
